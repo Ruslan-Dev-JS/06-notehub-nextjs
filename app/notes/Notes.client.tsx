@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
-import NoteList from "@/app/components/NoteList/NoteList";
-import SearchBox from "@/app/components/SearchBox/SearchBox";
-import Modal from "@/app/components/Modal/Modal";
-import NoteForm from "@/app/components/NoteForm/NoteForm";
-import Pagination from "@/app/components/Pagination/Pagination";
+import NoteList from "@/components/NoteList/NoteList";
+import SearchBox from "@/components/SearchBox/SearchBox";
+import Modal from "@/components/Modal/Modal";
+import NoteForm from "@/components/NoteForm/NoteForm";
+import Pagination from "@/components/Pagination/Pagination";
 
 export default function NotesClient() {
   const [currentPage, setCurrentPage] = useState(1);
