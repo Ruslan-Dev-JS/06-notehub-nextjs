@@ -15,11 +15,14 @@ export default function NotesClient() {
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Debounce search: запит виконується лише через 500ms після останнього введення
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(handler);
   }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["notes", page, debouncedSearch],
