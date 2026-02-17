@@ -122,6 +122,27 @@ a.secondary {
   }
 }
 
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 24px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 48px;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+}
+
+.description {
+  font-size: 18px;
+  line-height: 32px;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+
 @media (prefers-color-scheme: dark) {
   .logo {
     filter: invert();
