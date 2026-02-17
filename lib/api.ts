@@ -15,6 +15,11 @@ const instance = axios.create({
   },
 });
 
+interface ApiNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
 export const fetchNotes = async (
   page: number = 1,
   search: string = ""
@@ -22,12 +27,14 @@ export const fetchNotes = async (
   const params: Record<string, string | number> = { page };
   if (search) params.search = search;
 
-  const { data } = await instance.get<{ notes: Note[]; totalPages: number }>('/notes', { params });
-  // Нормалізуємо відповідь API до очікуваного формату
-  return {
+  const { data } = await instance.get<ApiNotesResponse>('/notes', { params });
+  
+  const response: FetchNotesResponse = {
     items: data.notes,
     totalPages: data.totalPages,
   };
+  
+  return response;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
