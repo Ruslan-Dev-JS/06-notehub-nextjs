@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
 import NoteList from "@/components/NoteList/NoteList";
@@ -10,71 +10,42 @@ import NoteForm from "@/components/NoteForm/NoteForm";
 import Pagination from "@/components/Pagination/Pagination";
 
 export default function NotesClient() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Debounce search: запит виконується лише через 500ms після останнього введення
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(handler);
+  }, [search]);
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["notes", currentPage, search],
-    queryFn: () => fetchNotes(currentPage, search),
+    queryKey: ["notes", page, debouncedSearch],
+    queryFn: () => fetchNotes(page, debouncedSearch),
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000, // 5 min
   });
-
-  if (isLoading) return <p>Loading, please wait...</p>;
-  
-  if (error) {
-    console.error("Error fetching notes:", error);
-    return (
-      <div>
-        <p>Something went wrong.</p>
-        <p style={{ fontSize: "12px", color: "red" }}>
-          {error instanceof Error ? error.message : "Unknown error"}
-        </p>
-      </div>
-    );
-  }
-  
-  if (!data) return <p>No data received.</p>;
-
-  const { notes, totalPages } = data;
-  
-  if (!notes || !Array.isArray(notes)) {
-    console.error("Invalid data structure:", data);
-    return <p>Invalid data format received.</p>;
-  }
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleSearch = (value: string) => {
-    setSearch(value);
-    setCurrentPage(1); // Скидаємо на першу сторінку при пошуку
-  };
 
   return (
     <div>
-      <div style={{ marginBottom: "24px", display: "flex", gap: "16px", alignItems: "center" }}>
-        <SearchBox onSearch={handleSearch} />
-        <button onClick={() => setIsModalOpen(true)}>Create Note</button>
+      <div style={{ marginBottom: 12 }}>
+        <button onClick={() => setIsModalOpen(true)}>Create note</button>
       </div>
-
-      {notes.length === 0 ? (
-        <p>No notes yet.</p>
+      <SearchBox value={search} onChange={setSearch} />
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>Error: {error instanceof Error ? error.message : "Failed to load notes"}</p>
       ) : (
-        <>
-          <NoteList notes={notes} />
-          
-          {totalPages > 1 && (
-            <Pagination
-              pageCount={totalPages}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-            />
-          )}
-        </>
+        <NoteList notes={data?.items || []} />
       )}
-
+      <Pagination
+        pageCount={data?.totalPages || 0}
+        currentPage={page}
+        onPageChange={setPage}
+      />
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
           <NoteForm onClose={() => setIsModalOpen(false)} />

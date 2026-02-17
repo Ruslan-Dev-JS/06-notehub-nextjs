@@ -19,31 +19,28 @@ export const fetchNotes = async (
   page: number = 1,
   search: string = ""
 ): Promise<FetchNotesResponse> => {
-  const params: Record<string, string | number> = {
-    page,
+  const params: Record<string, string | number> = { page };
+  if (search) params.search = search;
+
+  const { data } = await instance.get<{ notes: Note[]; totalPages: number }>('/notes', { params });
+  // Нормалізуємо відповідь API до очікуваного формату
+  return {
+    items: data.notes,
+    totalPages: data.totalPages,
   };
-  
-  if (search) {
-    params.search = search;
-  }
-
-  const { data } = await instance.get<FetchNotesResponse>('/notes', {
-    params,
-  });
-
-  return data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
   if (!id) throw new Error('Note id is required');
-  
   const { data } = await instance.get<Note>(`/notes/${id}`);
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<void> => {
+
+export const deleteNote = async (id: string): Promise<Note> => {
   if (!id) throw new Error('Note id is required');
-  await instance.delete(`/notes/${id}`);
+  const { data } = await instance.delete<Note>(`/notes/${id}`);
+  return data;
 };
 
 interface CreateNoteData {

@@ -1,6 +1,6 @@
-import type { Note } from './note';
+import type { Note } from "./note";
 
 export interface FetchNotesResponse {
-  notes: Note[];
+  items: Note[];       // ✅ обов'язково items
   totalPages: number;
 }
